@@ -13,6 +13,8 @@ services:
     volumes:
       - ./config/dendrite:/etc/matrix/dendrite
       - ./backup/database:/var/lib/matrix/dendrite
+    working_dir: /etc/matrix/dendrite
+    command: ["/usr/bin/dendrite", "-config", "dendrite.yaml"]
     depends_on:
       - postgres
       - redis
@@ -127,8 +129,8 @@ services:
       - element-web
       - admin-panel
     ports:
-      - "80:80"
-      - "443:443"
+      - "8081:80"
+      - "8443:443"
     networks:
       - matrix
 

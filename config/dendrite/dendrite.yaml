@@ -1,91 +1,78 @@
 # Конфігурація Matrix Dendrite сервера
-# Автор: Matrix Setup Team
+version: 2
 
-version: 1
 global:
-  server_name: ${MATRIX_SERVER_NAME}
-  private_key: ${SIGNING_KEY_PATH}
-  key_validity_period: 8760h
+  server_name: matrix.4ip.pp.ua
+  private_key: /etc/matrix/dendrite/matrix_key.pem
   trusted_third_party_id_servers:
     - matrix.org
     - vector.im
-
-client_api:
-  internal_api:
-    connect:
-      - http://dendrite:7777
-  external_api:
-    connect:
-      - http://0.0.0.0:8008
-    bind_addresses:
-      - :8008
-    cors:
-      allowed_origins:
-        - "*"
-
-federation_api:
-  internal_api:
-    connect:
-      - http://dendrite:7772
-  external_api:
-    connect:
-      - http://0.0.0.0:8448
-    bind_addresses:
-      - :8448
-
-media_api:
-  internal_api:
-    connect:
-      - http://dendrite:7774
-  external_api:
-    connect:
-      - http://0.0.0.0:8008
-    bind_addresses:
-      - :8008
-  base_path: /var/lib/matrix/media
-  max_file_size_bytes: 10485760
-
-sync_api:
-  internal_api:
-    connect:
-      - http://dendrite:7773
-
-room_server:
-  internal_api:
-    connect:
-      - http://dendrite:7770
-
-appservice_api:
-  internal_api:
-    connect:
-      - http://dendrite:7777
-
-key_server:
-  internal_api:
-    connect:
-      - http://dendrite:7776
-
-user_api:
-  internal_api:
-    connect:
-      - http://dendrite:7781
-  account_database:
-    connection_string: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+  disable_federation: false
+  presence:
+    enable_inbound: false
+    enable_outbound: false
+  report_stats:
+    enabled: false
+  server_notices:
+    enabled: false
+  metrics:
+    enabled: false
+  dns_cache:
+    enabled: false
+  database:
+    connection_string: postgresql://${POSTGRES_USER:-dendrite}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-dendrite}?sslmode=disable
     max_open_conns: 90
     max_idle_conns: 5
     conn_max_lifetime: -1
+  cache:
+    max_size_estimated: 1gb
+    max_age: 1h
 
-database:
-  connection_string: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
-  max_open_conns: 90
-  max_idle_conns: 5
-  conn_max_lifetime: -1
+client_api:
+  registration_disabled: false
+  registration_shared_secret: ${REGISTRATION_SHARED_SECRET}
+  guests_disabled: true
+  enable_registration_captcha: false
+  rate_limiting:
+    enabled: true
+    threshold: 20
+    cooloff_ms: 500
 
-redis:
-  addrs:
-    - ${REDIS_HOST}:${REDIS_PORT}
-  password: ${REDIS_PASSWORD}
-  pool_size: 100
-  max_retries: 3
+federation_api:
+  send_max_retries: 16
+  disable_tls_validation: false
+  disable_http_keepalives: false
+  prefer_direct_fetch: false
 
-registration_shared_secret: ${REGISTRATION_SHARED_SECRET} 
+media_api:
+  base_path: /var/lib/matrix/media
+  max_file_size_bytes: 10485760
+  dynamic_thumbnails: false
+  max_thumbnail_generators: 10
+  thumbnail_sizes:
+    - width: 32
+      height: 32
+      method: crop
+    - width: 96
+      height: 96
+      method: crop
+    - width: 640
+      height: 480
+      method: scale
+
+sync_api:
+  search:
+    enabled: false
+    index_path: "./searchindex"
+    language: "en"
+
+user_api:
+  bcrypt_cost: 10
+  auto_join_rooms: []
+
+mscs:
+  mscs: []
+
+logging:
+  - type: std
+    level: info
