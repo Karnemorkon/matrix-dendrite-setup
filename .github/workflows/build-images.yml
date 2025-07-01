@@ -54,6 +54,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
+    - name: Update Docker Hub description (admin-panel)
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: morkon06/matrix-dendrite-setup-admin-panel
+        readme-filepath: ./DOCKERHUB_OVERVIEW.md
+        
     - name: Build and push matrix-bot
       uses: docker/build-push-action@v5
       with:
@@ -65,6 +73,14 @@ jobs:
           ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-matrix-bot:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        
+    - name: Update Docker Hub description (matrix-bot)
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: morkon06/matrix-dendrite-setup-matrix-bot
+        readme-filepath: ./DOCKERHUB_OVERVIEW.md
         
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
