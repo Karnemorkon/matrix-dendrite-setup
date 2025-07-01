@@ -1,0 +1,97 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag'
+        required: true
+        default: 'latest'
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  REPO_NAME: matrix-dendrite-setup
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ env.DOCKER_USERNAME }}
+        password: ${{ env.DOCKER_PASSWORD }}
+        
+    - name: Extract version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Build and push admin-panel
+      uses: docker/build-push-action@v5
+      with:
+        context: ./dashboard/admin-panel
+        file: ./dashboard/admin-panel/Dockerfile
+        push: true
+        tags: |
+          ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-admin-panel:${{ steps.version.outputs.VERSION }}
+          ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-admin-panel:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push matrix-bot
+      uses: docker/build-push-action@v5
+      with:
+        context: ./config/bot
+        file: ./config/bot/Dockerfile
+        push: true
+        tags: |
+          ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-matrix-bot:${{ steps.version.outputs.VERSION }}
+          ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-matrix-bot:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Docker Images
+          
+          The following Docker images have been built and pushed to Docker Hub:
+          
+          - **Admin Panel**: `${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-admin-panel:${{ steps.version.outputs.VERSION }}`
+          - **Matrix Bot**: `${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-matrix-bot:${{ steps.version.outputs.VERSION }}`
+          
+          ## Usage
+          
+          Update your `docker-compose.yml` to use the pre-built images:
+          
+          ```yaml
+          admin-panel:
+            image: ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-admin-panel:${{ steps.version.outputs.VERSION }}
+            
+          matrix-bot:
+            image: ${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}-matrix-bot:${{ steps.version.outputs.VERSION }}
+          ```
+        draft: false
+        prerelease: false 

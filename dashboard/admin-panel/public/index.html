@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Dendrite - Адмін Панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Форма автентифікації -->
+    <div id="auth-container" class="container-fluid d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="card" style="max-width: 400px;">
+            <div class="card-header text-center">
+                <h4><i class="fas fa-lock me-2"></i>Автентифікація</h4>
+            </div>
+            <div class="card-body">
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Користувач</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Увійти</button>
+                </form>
+                <hr>
+                <button type="button" class="btn btn-outline-secondary w-100" onclick="showRegisterForm()">Реєстрація</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основна панель (прихована до автентифікації) -->
+    <div id="main-container" style="display: none;">
+        <!-- Навігація -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-server me-2"></i>
+                    Matrix Dendrite Admin
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" data-bs-toggle="tab">
+                                <i class="fas fa-tachometer-alt me-1"></i>Дашборд
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#services" data-bs-toggle="tab">
+                                <i class="fas fa-cogs me-1"></i>Сервіси
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#users" data-bs-toggle="tab">
+                                <i class="fas fa-users me-1"></i>Користувачі
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#backups" data-bs-toggle="tab">
+                                <i class="fas fa-database me-1"></i>Бекапи
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#bridges" data-bs-toggle="tab">
+                                <i class="fas fa-bridge me-1"></i>Мости
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#monitoring" data-bs-toggle="tab">
+                                <i class="fas fa-chart-line me-1"></i>Моніторинг
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#logs" data-bs-toggle="tab">
+                                <i class="fas fa-file-alt me-1"></i>Логи
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#audit" data-bs-toggle="tab">
+                                <i class="fas fa-history me-1"></i>Аудит
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="navbar-nav">
+                        <span class="navbar-text me-3">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="current-user"></span>
+                        </span>
+                        <span class="navbar-text me-3">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="current-time"></span>
+                        </span>
+                        <button class="btn btn-outline-light btn-sm me-2" id="theme-toggle" onclick="adminPanel.toggleTheme()">
+                            <i class="fas fa-moon me-1"></i>Темна
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Вийти
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Основний контент -->
+        <div class="container-fluid mt-4">
+            <div class="tab-content">
+                <!-- Дашборд -->
+                <div class="tab-pane fade show active" id="dashboard">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="running-services">0</h4>
+                                            <p class="mb-0">Активні сервіси</p>
+                                        </div>
+                                        <i class="fas fa-play-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="total-users">0</h4>
+                                            <p class="mb-0">Користувачі</p>
+                                        </div>
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="backup-count">0</h4>
+                                            <p class="mb-0">Бекапи</p>
+                                        </div>
+                                        <i class="fas fa-database fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 id="system-status">OK</h4>
+                                            <p class="mb-0">Статус системи</p>
+                                        </div>
+                                        <i class="fas fa-heartbeat fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line me-2"></i>Метрики системи</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="metricsChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Останні події</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="events-list">
+                                        <p class="text-muted">Завантаження подій...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Сервіси -->
+                <div class="tab-pane fade" id="services">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-cogs me-2"></i>Управління сервісами</h5>
+                            <button class="btn btn-primary btn-sm" onclick="refreshServices()">
+                                <i class="fas fa-sync-alt me-1"></i>Оновити
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Назва</th>
+                                            <th>Статус</th>
+                                            <th>Образ</th>
+                                            <th>Порти</th>
+                                            <th>Дії</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="services-table">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Завантаження...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Користувачі -->
+                <div class="tab-pane fade" id="users">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-users me-2"></i>Управління користувачами</h5>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                                <i class="fas fa-plus me-1"></i>Створити користувача
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Користувач</th>
+                                            <th>Дата створення</th>
+                                            <th>Статус</th>
+                                            <th>Дії</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Завантаження...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Бекапи -->
+                <div class="tab-pane fade" id="backups">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-database me-2"></i>Управління бекапами</h5>
+                            <div>
+                                <button class="btn btn-warning btn-sm me-2" onclick="createBackup()">
+                                    <i class="fas fa-plus me-1"></i>Створити бекап
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="refreshBackups()">
+                                    <i class="fas fa-sync-alt me-1"></i>Оновити
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Назва</th>
+                                            <th>Розмір</th>
+                                            <th>Дата створення</th>
+                                            <th>Дії</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="backups-table">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Завантаження...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Мости -->
+                <div class="tab-pane fade" id="bridges">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-bridge me-2"></i>Управління мостами</h5>
+                            <button class="btn btn-primary btn-sm" onclick="refreshBridges()">
+                                <i class="fas fa-sync-alt me-1"></i>Оновити
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Назва</th>
+                                            <th>Статус</th>
+                                            <th>Образ</th>
+                                            <th>Дії</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bridges-table">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Завантаження...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Моніторинг -->
+                <div class="tab-pane fade" id="monitoring">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-line me-2"></i>Моніторинг системи</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="healthcheck-container">
+                                <p>Завантаження...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-bar me-2"></i>Grafana Dashboard</h5>
+                        </div>
+                        <div class="card-body">
+                            <iframe src="http://grafana:3000" width="100%" height="600" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Логи -->
+                <div class="tab-pane fade" id="logs">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-file-alt me-2"></i>Логи сервісів</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <select class="form-select" id="service-select">
+                                        <option value="">Виберіть сервіс...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control" id="log-lines" value="100" placeholder="Рядків">
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary" onclick="loadLogs()">
+                                        <i class="fas fa-search me-1"></i>Завантажити
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-dark text-light p-3 rounded">
+                                <pre id="logs-content" style="max-height: 500px; overflow-y: auto;">Виберіть сервіс для перегляду логів...</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Аудит -->
+                <div class="tab-pane fade" id="audit">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-history me-2"></i>Аудит (історія дій)</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-striped" id="audit-log-table">
+                                <thead>
+                                    <tr>
+                                        <th>Час</th>
+                                        <th>Користувач</th>
+                                        <th>Дія</th>
+                                        <th>Деталі</th>
+                                        <th>Результат</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="5">Завантаження...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальне вікно створення користувача -->
+        <div class="modal fade" id="createUserModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Створити користувача</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createUserForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Ім'я користувача</label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Пароль</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="displayName" class="form-label">Відображуване ім'я</label>
+                                <input type="text" class="form-control" id="displayName">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <button type="button" class="btn btn-primary" onclick="createUser()">Створити</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сповіщення -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="notification" class="toast" role="alert">
+                <div class="toast-header">
+                    <strong class="me-auto">Сповіщення</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body" id="notification-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 

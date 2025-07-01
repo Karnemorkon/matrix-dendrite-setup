@@ -1,0 +1,91 @@
+# Конфігурація Matrix Dendrite сервера
+# Автор: Matrix Setup Team
+
+version: 1
+global:
+  server_name: ${MATRIX_SERVER_NAME}
+  private_key: ${SIGNING_KEY_PATH}
+  key_validity_period: 8760h
+  trusted_third_party_id_servers:
+    - matrix.org
+    - vector.im
+
+client_api:
+  internal_api:
+    connect:
+      - http://dendrite:7777
+  external_api:
+    connect:
+      - http://0.0.0.0:8008
+    bind_addresses:
+      - :8008
+    cors:
+      allowed_origins:
+        - "*"
+
+federation_api:
+  internal_api:
+    connect:
+      - http://dendrite:7772
+  external_api:
+    connect:
+      - http://0.0.0.0:8448
+    bind_addresses:
+      - :8448
+
+media_api:
+  internal_api:
+    connect:
+      - http://dendrite:7774
+  external_api:
+    connect:
+      - http://0.0.0.0:8008
+    bind_addresses:
+      - :8008
+  base_path: /var/lib/matrix/media
+  max_file_size_bytes: 10485760
+
+sync_api:
+  internal_api:
+    connect:
+      - http://dendrite:7773
+
+room_server:
+  internal_api:
+    connect:
+      - http://dendrite:7770
+
+appservice_api:
+  internal_api:
+    connect:
+      - http://dendrite:7777
+
+key_server:
+  internal_api:
+    connect:
+      - http://dendrite:7776
+
+user_api:
+  internal_api:
+    connect:
+      - http://dendrite:7781
+  account_database:
+    connection_string: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+    max_open_conns: 90
+    max_idle_conns: 5
+    conn_max_lifetime: -1
+
+database:
+  connection_string: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+  max_open_conns: 90
+  max_idle_conns: 5
+  conn_max_lifetime: -1
+
+redis:
+  addrs:
+    - ${REDIS_HOST}:${REDIS_PORT}
+  password: ${REDIS_PASSWORD}
+  pool_size: 100
+  max_retries: 3
+
+registration_shared_secret: ${REGISTRATION_SHARED_SECRET} 

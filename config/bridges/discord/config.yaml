@@ -1,0 +1,40 @@
+# Конфігурація Discord Bridge
+# Автор: Matrix Setup Team
+
+homeserver:
+  address: http://dendrite:8008
+  domain: ${MATRIX_SERVER_NAME}
+
+appservice:
+  address: http://discord-bridge:29330
+  hostname: 0.0.0.0
+  port: 29330
+  database: sqlite:///discord.db
+
+bridge:
+  username_format: discord_{userid}
+  displayname_template: "Discord: {displayname}"
+  avatar_template: "mxc://example.com/discord_{userid}"
+
+  permissions:
+    ${MATRIX_SERVER_NAME}:
+      - "@admin:${MATRIX_SERVER_NAME}"
+
+  relay:
+    enabled: false
+
+  encryption:
+    allow: false
+    default: false
+
+  delivery_receipts: false
+  message_status_events: false
+  message_error_notices: false
+
+discord:
+  bot_token: ${DISCORD_BOT_TOKEN}
+  application_id: ${DISCORD_APPLICATION_ID}
+
+logging:
+  level: info
+  timestamp: true 

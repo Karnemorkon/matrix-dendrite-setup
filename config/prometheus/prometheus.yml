@@ -1,0 +1,53 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'dendrite'
+    static_configs:
+      - targets: ['dendrite:8008']
+    metrics_path: '/_matrix/federation/v1/metrics'
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+
+  - job_name: 'admin-panel'
+    static_configs:
+      - targets: ['admin-panel:3000']
+
+  - job_name: 'element-web'
+    static_configs:
+      - targets: ['element-web:80']
+
+  - job_name: 'signal-bridge'
+    static_configs:
+      - targets: ['signal-bridge:29328']
+
+  - job_name: 'whatsapp-bridge'
+    static_configs:
+      - targets: ['whatsapp-bridge:29329']
+
+  - job_name: 'discord-bridge'
+    static_configs:
+      - targets: ['discord-bridge:29330'] 
