@@ -49,16 +49,29 @@ bash scripts/install.sh
 Для швидшого розгортання можна використовувати готові Docker образи:
 
 ```bash
-# Збірка та публікація образів
-bash scripts/build-images.sh --username your-username --push
-
 # Використання в docker-compose.yml
 # Замість build: ./dashboard/admin-panel
-image: your-username/matrix-dendrite-setup-admin-panel:latest
+image: morkon06/matrix-dendrite-setup-admin-panel:latest
 
 # Замість build: ./config/bot  
-image: your-username/matrix-dendrite-setup-matrix-bot:latest
+image: morkon06/matrix-dendrite-setup-matrix-bot:latest
 ```
+
+### Налаштування GitHub для автоматичної збірки
+
+1. **Додайте секрети в GitHub:**
+   - `DOCKER_USERNAME` - ваш Docker Hub username
+   - `DOCKER_PASSWORD` - ваш Docker Hub access token
+
+2. **Створіть тег для автоматичної збірки:**
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+
+3. **Перевірте результати в GitHub Actions**
+
+Детальні інструкції: [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md)
 
 Детальніше в [Docker Images Guide](docs/DOCKER_IMAGES.md).
 
